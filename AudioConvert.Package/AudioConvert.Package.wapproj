@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0'">
+    <VisualStudioVersion>15.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="微软|AnyCPU">
+      <Configuration>微软</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="微软|x64">
+      <Configuration>微软</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="微软测试|AnyCPU">
+      <Configuration>微软测试</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="微软测试|x64">
+      <Configuration>微软测试</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup>
+    <WapProjPath Condition="'$(WapProjPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
+  </PropertyGroup>
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
+  <PropertyGroup>
+    <ProjectGuid>{769F47EC-8AEA-476A-B382-69E771EA93CA}</ProjectGuid>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <DefaultLanguage>zh-CN</DefaultLanguage>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <UapAppxPackageBuildMode>StoreUpload</UapAppxPackageBuildMode>
+    <EntryPointProjectUniqueName>..\AudioConvert\AudioConvert.csproj</EntryPointProjectUniqueName>
+    <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackagedAppOutputPlatformSegment Condition="'$(Platform)' != '' and '$(Platform)' != 'AnyCPU'">$(Platform)\</PackagedAppOutputPlatformSegment>
+    <PackagedAppOutputPath>..\AudioConvert\bin\$(PackagedAppOutputPlatformSegment)$(Configuration)\net472\</PackagedAppOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == '微软测试'">
+    <EnablePackageQuotaBypass>true</EnablePackageQuotaBypass>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.png" />
+    <Content Include="Assets\Square44x44Logo.png" />
+    <Content Include="Assets\Square71x71Logo.png" />
+    <Content Include="Assets\Square150x150Logo.png" />
+    <Content Include="Assets\Square310x310Logo.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.png" />
+    <None Include="Package.StoreAssociation.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\docs\PRIVACY_POLICY_DRAFT.md">
+      <Link>Notices\PRIVACY_POLICY_DRAFT.md</Link>
+    </Content>
+    <Content Include="..\docs\THIRD_PARTY_NOTICES.md">
+      <Link>Notices\THIRD_PARTY_NOTICES.md</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(PackagedAppOutputPath)QQMusicDecryptRunner.exe">
+      <Link>AudioConvert\QQMusicDecryptRunner.exe</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)QQMusicDecryptRunner.exe.config">
+      <Link>AudioConvert\QQMusicDecryptRunner.exe.config</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)QQMusicDecryptHook.dll">
+      <Link>AudioConvert\QQMusicDecryptHook.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyHook.dll">
+      <Link>AudioConvert\EasyHook.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyHook32.dll">
+      <Link>AudioConvert\EasyHook32.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyHook32Svc.exe">
+      <Link>AudioConvert\EasyHook32Svc.exe</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyHook64.dll">
+      <Link>AudioConvert\EasyHook64.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyHook64Svc.exe">
+      <Link>AudioConvert\EasyHook64Svc.exe</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyLoad32.dll">
+      <Link>AudioConvert\EasyLoad32.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)EasyLoad64.dll">
+      <Link>AudioConvert\EasyLoad64.dll</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)KugouInfraRunner.exe">
+      <Link>AudioConvert\KugouInfraRunner.exe</Link>
+    </Content>
+    <Content Include="$(PackagedAppOutputPath)KugouInfraRunner.exe.config">
+      <Link>AudioConvert\KugouInfraRunner.exe.config</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioConvert\AudioConvert.csproj">
+      <Project>{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}</Project>
+      <Name>AudioConvert</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
+</Project>

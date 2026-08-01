@@ -1,0 +1,37 @@
+# Visual Studio / .NET
+.vs/
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build and packaging outputs
+codex-build/
+**/AppPackages/
+AudioConvert/Tools/ffmpeg.exe
+*.appx
+*.appxbundle
+*.appxsym
+*.msix
+*.msixbundle
+*.msixupload
+*.nupkg
+*.snupkg
+*.pdb
+
+# Local and temporary files
+*.tmp
+*.log
+*.cache
+*.bak
+*.orig
+*.swp
+Thumbs.db
+Desktop.ini
+
+# Local agent metadata
+.agents/
+.codex/

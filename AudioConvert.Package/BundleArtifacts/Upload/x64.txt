@@ -1,0 +1,2 @@
+MainPackage=E:\C#workdemo\AudioConvert\AudioConvert.Package\bin\x64\微软\Upload\AudioConvert.Package_1.0.0.4_x64_微软.msix
+SymbolPackage=E:\C#workdemo\AudioConvert\AudioConvert.Package\bin\x64\微软\Upload\AudioConvert.Package_1.0.0.4_微软\AudioConvert.Package_1.0.0.4_x64_微软.appxsym
