@@ -1,0 +1,121 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioConvert", "AudioConvert\AudioConvert.csproj", "{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQMusicDecryptHook", "QQMusicDecryptHook\QQMusicDecryptHook.csproj", "{D44024C1-4473-49ED-9F97-55FF12E52887}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQMusicDecryptRunner", "QQMusicDecryptRunner\QQMusicDecryptRunner.csproj", "{6A083DB9-FDFA-4B93-866D-54AA28F997E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KugouInfraRunner", "KugouInfraRunner\KugouInfraRunner.csproj", "{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}"
+EndProject
+Project("{C7166F68-B75F-4F03-8DDB-12FECF6E7D95}") = "AudioConvert.Package", "AudioConvert.Package\AudioConvert.Package.wapproj", "{769F47EC-8AEA-476A-B382-69E771EA93CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		微软|Any CPU = 微软|Any CPU
+		微软|x64 = 微软|x64
+		微软测试|Any CPU = 微软测试|Any CPU
+		微软测试|x64 = 微软测试|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Debug|x64.ActiveCfg = Debug|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Debug|x64.Build.0 = Debug|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Release|x64.ActiveCfg = Release|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.Release|x64.Build.0 = Release|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软|Any CPU.ActiveCfg = 微软|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软|Any CPU.Build.0 = 微软|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软|x64.ActiveCfg = 微软|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软|x64.Build.0 = 微软|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软测试|Any CPU.ActiveCfg = 微软测试|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软测试|Any CPU.Build.0 = 微软测试|Any CPU
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软测试|x64.ActiveCfg = 微软测试|x64
+		{8D4F46F1-8B27-4113-84D1-BBB9FFA5C9FE}.微软测试|x64.Build.0 = 微软测试|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Debug|x64.ActiveCfg = Debug|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Debug|x64.Build.0 = Debug|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Release|x64.ActiveCfg = Release|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.Release|x64.Build.0 = Release|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软|Any CPU.ActiveCfg = 微软|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软|Any CPU.Build.0 = 微软|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软|x64.ActiveCfg = 微软|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软|x64.Build.0 = 微软|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软测试|Any CPU.ActiveCfg = 微软测试|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软测试|Any CPU.Build.0 = 微软测试|Any CPU
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软测试|x64.ActiveCfg = 微软测试|x64
+		{D44024C1-4473-49ED-9F97-55FF12E52887}.微软测试|x64.Build.0 = 微软测试|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Debug|x64.ActiveCfg = Debug|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Debug|x64.Build.0 = Debug|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Release|x64.ActiveCfg = Release|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.Release|x64.Build.0 = Release|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软|Any CPU.ActiveCfg = 微软|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软|Any CPU.Build.0 = 微软|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软|x64.ActiveCfg = 微软|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软|x64.Build.0 = 微软|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软测试|Any CPU.ActiveCfg = 微软测试|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软测试|Any CPU.Build.0 = 微软测试|Any CPU
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软测试|x64.ActiveCfg = 微软测试|x64
+		{6A083DB9-FDFA-4B93-866D-54AA28F997E1}.微软测试|x64.Build.0 = 微软测试|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Debug|x64.ActiveCfg = Debug|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Debug|x64.Build.0 = Debug|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Release|x64.ActiveCfg = Release|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.Release|x64.Build.0 = Release|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软|Any CPU.ActiveCfg = 微软|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软|Any CPU.Build.0 = 微软|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软|x64.ActiveCfg = 微软|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软|x64.Build.0 = 微软|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软测试|Any CPU.ActiveCfg = 微软测试|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软测试|Any CPU.Build.0 = 微软测试|Any CPU
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软测试|x64.ActiveCfg = 微软测试|x64
+		{0F8FA3D9-D83D-A90F-8509-2DA1848BA90C}.微软测试|x64.Build.0 = 微软测试|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Debug|x64.ActiveCfg = Debug|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Debug|x64.Build.0 = Debug|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Debug|x64.Deploy.0 = Debug|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|Any CPU.Deploy.0 = Release|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|x64.ActiveCfg = Release|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|x64.Build.0 = Release|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.Release|x64.Deploy.0 = Release|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|Any CPU.ActiveCfg = 微软|Any CPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|Any CPU.Build.0 = 微软|Any CPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|Any CPU.Deploy.0 = 微软|Any CPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|x64.ActiveCfg = 微软|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|x64.Build.0 = 微软|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软|x64.Deploy.0 = 微软|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|Any CPU.ActiveCfg = 微软测试|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|Any CPU.Build.0 = 微软测试|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|Any CPU.Deploy.0 = 微软测试|AnyCPU
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|x64.ActiveCfg = 微软测试|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|x64.Build.0 = 微软测试|x64
+		{769F47EC-8AEA-476A-B382-69E771EA93CA}.微软测试|x64.Deploy.0 = 微软测试|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C42B18D3-9B50-4CA3-ABAF-7A2B365D56FE}
+	EndGlobalSection
+EndGlobal

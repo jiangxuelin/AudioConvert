@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <OutputType>Exe</OutputType>
+	  <TargetFramework>net472</TargetFramework>
+	  <LangVersion>latest</LangVersion>
+	  <PlatformTarget>x86</PlatformTarget>
+	  <Prefer32Bit>true</Prefer32Bit>
+	  <Nullable>enable</Nullable>
+	  <Configurations>Debug;Release;微软;微软测试</Configurations>
+	  <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QQMusicDecryptHook\QQMusicDecryptHook.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="EasyHook">
+      <HintPath>..\ThirdParty\EasyHook\lib\net40\EasyHook.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
