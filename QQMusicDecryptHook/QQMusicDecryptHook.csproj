@@ -3,15 +3,20 @@
   <PropertyGroup>
 	  <TargetFramework>net472</TargetFramework>
 	  <LangVersion>latest</LangVersion>
-	  <PlatformTarget>x86</PlatformTarget>
+	  <PlatformTarget>AnyCPU</PlatformTarget>
 	  <Nullable>enable</Nullable>
-	  <Configurations>Debug;Release;微软;微软测试</Configurations>
+	  <Configurations>Debug;Release;微软;微软测试;微软联调</Configurations>
 	  <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<EasyHookManagedPath Condition="'$(Configuration)' == '微软' Or '$(Configuration)' == '微软测试' Or '$(Configuration)' == '微软联调'">..\ThirdParty\EasyHook\lib\net40-msix\EasyHook.dll</EasyHookManagedPath>
+		<EasyHookManagedPath Condition="'$(EasyHookManagedPath)' == ''">..\ThirdParty\EasyHook\lib\net40\EasyHook.dll</EasyHookManagedPath>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Reference Include="EasyHook">
-			<HintPath>..\ThirdParty\EasyHook\lib\net40\EasyHook.dll</HintPath>
+			<HintPath>$(EasyHookManagedPath)</HintPath>
 			<Private>true</Private>
 		</Reference>
 	</ItemGroup>

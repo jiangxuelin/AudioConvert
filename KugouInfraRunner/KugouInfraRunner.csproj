@@ -8,7 +8,7 @@
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Configurations>Debug;Release;微软;微软测试</Configurations>
+    <Configurations>Debug;Release;微软;微软测试;微软联调</Configurations>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
