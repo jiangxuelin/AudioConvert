@@ -17,6 +17,9 @@
 *.md text eol=lf
 *.txt text eol=lf
 
+UpgradeLog*.htm linguist-generated=true
+AudioConvert.Package/BundleArtifacts/** linguist-generated=true
+
 *.png binary
 *.ico binary
 *.dll binary
