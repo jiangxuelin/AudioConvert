@@ -1,0 +1,55 @@
+#if PACKAGE_TEST_QUOTA
+using System.Threading.Tasks;
+
+namespace AudioConvert.Services
+{
+    public sealed class PackageTestConversionQuotaService : IConversionQuotaService
+    {
+        private const uint TestBalance = 9999;
+
+        public Task<ConversionQuotaResult> SignInAsync()
+        {
+            return Task.FromResult(
+                ConversionQuotaResult.Success(TestBalance, "Package test quota bypass is enabled."));
+        }
+
+        public Task<ConversionQuotaResult> RefreshBalanceAsync()
+        {
+            return Task.FromResult(
+                ConversionQuotaResult.Success(TestBalance, "Package test quota bypass is enabled."));
+        }
+
+        public Task<ConversionQuotaResult> EnsureQuotaAsync()
+        {
+            return Task.FromResult(
+                ConversionQuotaResult.Success(TestBalance, "Package test quota bypass is enabled."));
+        }
+
+        public Task<ConversionQuotaResult> PurchaseQuotaAsync()
+        {
+            return Task.FromResult(
+                ConversionQuotaResult.Success(TestBalance, "Package test quota bypass is enabled."));
+        }
+
+        public Task<ConversionQuotaResult> ConsumeOneAsync()
+        {
+            return Task.FromResult(
+                ConversionQuotaResult.Success(TestBalance, "Package test quota bypass is enabled."));
+        }
+
+        public Task<ConversionQuotaPurchaseInfo> GetPurchaseInfoAsync()
+        {
+            var option = new ConversionQuotaPurchaseOption(
+                "PACKAGE_TEST_QUOTA",
+                "测试次数包",
+                "Package test quota bypass is enabled.",
+                "测试模式",
+                "9999 次",
+                "Test");
+
+            return Task.FromResult(
+                ConversionQuotaPurchaseInfo.Success(TestBalance, option, "Package test quota bypass is enabled."));
+        }
+    }
+}
+#endif
