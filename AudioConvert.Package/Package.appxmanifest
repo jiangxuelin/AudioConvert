@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -13,7 +13,7 @@
   <Identity
     Name="Estherrrr.477589C055491"
     Publisher="CN=9EF12D78-505D-4A5F-8741-027D94DEE7F0"
-    Version="1.0.0.4"
+    Version="1.0.2.0"
     ProcessorArchitecture="neutral" />
 
   <Properties>
@@ -55,6 +55,7 @@
   </Applications>
 
   <Capabilities>
+    <uap:Capability Name="userAccountInformation" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>
