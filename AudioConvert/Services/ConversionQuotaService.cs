@@ -137,6 +137,7 @@ namespace AudioConvert.Services
         private const string StoreManagedConsumableKind = "Consumable";
         private const string UnmanagedConsumableKind = "UnmanagedConsumable";
         private const string DurableKind = "Durable";
+        private const string MicrosoftStoreSettingsUri = "ms-windows-store://settings";
         private const uint ConsumptionQuantity = 1;
 
         private readonly Func<IntPtr> _windowHandleProvider;
@@ -166,13 +167,29 @@ namespace AudioConvert.Services
                 return readinessFailure;
             }
 
+            bool isStoreOpened = await Windows.System.Launcher.LaunchUriAsync(new Uri(MicrosoftStoreSettingsUri));
+            if (!isStoreOpened)
+            {
+                return ConversionQuotaResult.Failure("无法打开 Microsoft Store 登录页面。请手动打开 Microsoft Store，在右上角账号入口登录后重试。");
+            }
+
             ConversionQuotaResult pendingResult = await FlushPendingConsumptionsAsync();
             if (!pendingResult.IsSuccess)
             {
                 return pendingResult;
             }
 
-            return await GetBalanceAsync("Microsoft Store 账号状态已同步。");
+            ConversionQuotaResult balanceResult = await GetBalanceAsync("Microsoft Store 账号状态已同步。");
+            if (balanceResult.IsSuccess)
+            {
+                return balanceResult;
+            }
+
+            return ConversionQuotaResult.Failure(
+                "已打开 Microsoft Store 登录页面。请在 Microsoft Store 中登录账号后，返回本应用再次点击登录同步。"
+                + Environment.NewLine
+                + balanceResult.Message,
+                balanceResult.BalanceRemaining);
         }
 
         public async Task<ConversionQuotaResult> RefreshBalanceAsync()
