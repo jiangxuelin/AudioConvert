@@ -1,0 +1,102 @@
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Windows.Services.Store;
+
+namespace AudioConvert.Services
+{
+    public interface IStoreReviewService
+    {
+        Task<StoreReviewRequestResult> RequestReviewAsync();
+    }
+
+    public sealed class StoreReviewRequestResult
+    {
+        private StoreReviewRequestResult(bool isSuccess, string message)
+        {
+            IsSuccess = isSuccess;
+            Message = message;
+        }
+
+        public bool IsSuccess { get; }
+
+        public string Message { get; }
+
+        public static StoreReviewRequestResult Success(string message) =>
+            new StoreReviewRequestResult(true, message);
+
+        public static StoreReviewRequestResult Failure(string message) =>
+            new StoreReviewRequestResult(false, message);
+    }
+
+    internal interface IStoreReviewRequester
+    {
+        Task RequestReviewAsync(IntPtr ownerWindowHandle);
+    }
+
+    public sealed class MicrosoftStoreReviewService : IStoreReviewService
+    {
+        private readonly Func<IntPtr> _windowHandleProvider;
+        private readonly IStoreReviewRequester _requester;
+
+        public MicrosoftStoreReviewService()
+            : this(() => IntPtr.Zero)
+        {
+        }
+
+        public MicrosoftStoreReviewService(Func<IntPtr> windowHandleProvider)
+            : this(windowHandleProvider, new StoreContextReviewRequester())
+        {
+        }
+
+        internal MicrosoftStoreReviewService(
+            Func<IntPtr> windowHandleProvider,
+            IStoreReviewRequester requester)
+        {
+            _windowHandleProvider = windowHandleProvider ?? throw new ArgumentNullException(nameof(windowHandleProvider));
+            _requester = requester ?? throw new ArgumentNullException(nameof(requester));
+        }
+
+        public async Task<StoreReviewRequestResult> RequestReviewAsync()
+        {
+            try
+            {
+                IntPtr ownerWindowHandle = _windowHandleProvider();
+                await _requester.RequestReviewAsync(ownerWindowHandle);
+                return StoreReviewRequestResult.Success("Microsoft Store review prompt requested.");
+            }
+            catch (Exception exception)
+            {
+                // Rating prompts depend on Store package identity and system support.
+                // Trial membership must remain claimed even when the prompt cannot open.
+                string message = "Microsoft Store review prompt could not be opened: " + FormatExtendedError(exception);
+                Debug.WriteLine(message);
+                return StoreReviewRequestResult.Failure(message);
+            }
+        }
+
+        private static string FormatExtendedError(Exception exception)
+        {
+            return exception.Message + " (0x" + exception.HResult.ToString("X8") + ")";
+        }
+    }
+
+    internal sealed class StoreContextReviewRequester : IStoreReviewRequester
+    {
+        public async Task RequestReviewAsync(IntPtr ownerWindowHandle)
+        {
+            if (ownerWindowHandle == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Owner window handle is unavailable.");
+            }
+
+            StoreContext context = StoreContext.GetDefault();
+            if (!WinRtWindowInitializer.TryInitialize(context, ownerWindowHandle))
+            {
+                throw new InvalidOperationException("Microsoft Store context could not be initialized with the owner window.");
+            }
+
+            await context.RequestRateAndReviewAppAsync();
+        }
+    }
+}
