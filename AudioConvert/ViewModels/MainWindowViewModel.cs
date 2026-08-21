@@ -17,26 +17,40 @@ namespace AudioConvert.ViewModels
     {
         private const string AudioFileFilter =
             "音频文件 (*.mp3;*.wav;*.flac;*.ogg;*.m4a;*.aac;*.mgg;*.mflac;*.ncm;*.kgg;*.kgma;*.kwm)|*.mp3;*.wav;*.flac;*.ogg;*.m4a;*.aac;*.mgg;*.mflac;*.ncm;*.kgg;*.kgma;*.kwm";
+        private const string LoginButtonDefaultText = "登录";
+        private const string LoginButtonFallbackInitials = "MS";
 
         private readonly IAudioConverterService _converterService;
         private readonly IConversionQuotaService _quotaService;
+        private readonly AudioProcessingWorkflow _processingWorkflow;
+        private readonly TrialMembershipClaimCoordinator? _trialMembershipClaimCoordinator;
 
         public MainWindowViewModel()
-            : this(new AudioConverterService(), CreateDefaultQuotaService())
+            : this(new AudioConverterService(), CreateDefaultQuotaService(), null)
         {
         }
 
         public MainWindowViewModel(IAudioConverterService converterService)
-            : this(converterService, CreateDefaultQuotaService())
+            : this(converterService, CreateDefaultQuotaService(), null)
         {
         }
 
         public MainWindowViewModel(
             IAudioConverterService converterService,
             IConversionQuotaService quotaService)
+            : this(converterService, quotaService, null)
+        {
+        }
+
+        public MainWindowViewModel(
+            IAudioConverterService converterService,
+            IConversionQuotaService quotaService,
+            TrialMembershipClaimCoordinator? trialMembershipClaimCoordinator)
         {
             _converterService = converterService ?? throw new ArgumentNullException(nameof(converterService));
             _quotaService = quotaService ?? throw new ArgumentNullException(nameof(quotaService));
+            _processingWorkflow = new AudioProcessingWorkflow(_quotaService);
+            _trialMembershipClaimCoordinator = trialMembershipClaimCoordinator;
 
             Tools = new ObservableCollection<ToolOption>
             {
@@ -133,6 +147,9 @@ namespace AudioConvert.ViewModels
 
             StatusText = "准备就绪";
             QuotaStatusText = "剩余次数：正在读取...";
+            TrialStatusText = "试用会员：正在读取...";
+            StoreAccountDisplayName = "Microsoft Store";
+            StoreAccountInitials = LoginButtonFallbackInitials;
         }
 
         private static IConversionQuotaService CreateDefaultQuotaService()
@@ -140,7 +157,9 @@ namespace AudioConvert.ViewModels
 #if PACKAGE_TEST_QUOTA
             return new PackageTestConversionQuotaService();
 #else
-            return new MicrosoftStoreConversionQuotaService();
+            return new TrialThenStoreConversionQuotaService(
+                new LocalTrialUsageStore(),
+                new MicrosoftStoreConversionQuotaService());
 #endif
         }
 
@@ -370,6 +389,80 @@ namespace AudioConvert.ViewModels
             }
         }
 
+        private string _trialStatusText = string.Empty;
+        public string TrialStatusText
+        {
+            get => _trialStatusText;
+            private set
+            {
+                if (_trialStatusText == value)
+                {
+                    return;
+                }
+
+                _trialStatusText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isStoreAccountSynced;
+        public bool IsStoreAccountSynced
+        {
+            get => _isStoreAccountSynced;
+            private set
+            {
+                if (_isStoreAccountSynced == value)
+                {
+                    return;
+                }
+
+                _isStoreAccountSynced = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LoginButtonContent));
+                OnPropertyChanged(nameof(LoginButtonToolTip));
+            }
+        }
+
+        private string _storeAccountDisplayName = string.Empty;
+        public string StoreAccountDisplayName
+        {
+            get => _storeAccountDisplayName;
+            private set
+            {
+                if (_storeAccountDisplayName == value)
+                {
+                    return;
+                }
+
+                _storeAccountDisplayName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LoginButtonToolTip));
+            }
+        }
+
+        private string _storeAccountInitials = LoginButtonFallbackInitials;
+        public string StoreAccountInitials
+        {
+            get => _storeAccountInitials;
+            private set
+            {
+                if (_storeAccountInitials == value)
+                {
+                    return;
+                }
+
+                _storeAccountInitials = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LoginButtonContent));
+            }
+        }
+
+        public string LoginButtonContent => IsStoreAccountSynced ? StoreAccountInitials : LoginButtonDefaultText;
+
+        public string LoginButtonToolTip => IsStoreAccountSynced
+            ? "Microsoft Store 账号已同步：" + StoreAccountDisplayName
+            : "登录 Microsoft Store";
+
         public ICommand SelectToolCommand { get; }
 
         public ICommand SelectSingleFileCommand { get; }
@@ -538,75 +631,74 @@ namespace AudioConvert.ViewModels
                 return;
             }
 
-            IsBusy = true;
-            StatusText = "正在检查剩余次数...";
-            ConversionQuotaResult quotaResult;
-            try
-            {
-                quotaResult = await _quotaService.EnsureQuotaAsync();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
-
-            UpdateQuotaStatus(quotaResult);
-            if (!quotaResult.IsSuccess)
-            {
-                StatusText = quotaResult.IsUserCanceled ? "已取消购买" : "次数不足";
-                if (!quotaResult.IsUserCanceled)
-                {
-                    ResultDialog.ShowFailure("需要购买次数包", quotaResult.Message);
-                }
-
-                return;
-            }
-
-            Func<Task<ConvertResult>> operation;
-            try
-            {
-                operation = BuildCurrentOperation();
-            }
-            catch (Exception exception)
-            {
-                StatusText = "处理失败";
-                ResultDialog.ShowFailure("处理失败", exception.Message);
-                return;
-            }
             string successTitle = IsConvertTool ? "转换成功" : "处理成功";
 
             bool retry;
             do
             {
                 retry = false;
-                IsBusy = true;
-                StatusText = "正在处理...";
-
-                ConvertResult result;
+                Func<Task<ConvertResult>> operation;
                 try
                 {
-                    result = await operation();
+                    operation = BuildCurrentOperation();
+                }
+                catch (Exception exception)
+                {
+                    StatusText = "处理失败";
+                    ResultDialog.ShowFailure("处理失败", exception.Message);
+                    return;
+                }
+
+                IsBusy = true;
+                AudioProcessingWorkflowResult workflowResult;
+                try
+                {
+                    workflowResult = await _processingWorkflow.ExecuteAsync(
+                        operation,
+                        successTitle,
+                        new Progress<string>(message => StatusText = message));
                 }
                 finally
                 {
                     IsBusy = false;
                 }
 
-                if (result.IsSuccess)
+                if (workflowResult.QuotaResult is not null)
                 {
-                    StatusText = "正在扣减次数...";
-                    ConversionQuotaResult consumeResult = await _quotaService.ConsumeOneAsync();
-                    UpdateQuotaStatus(consumeResult);
-                    StatusText = consumeResult.IsSuccess ? "处理完成" : "处理完成，扣次待同步";
-                    string successMessage = consumeResult.IsSuccess
+                    UpdateQuotaStatus(workflowResult.QuotaResult);
+                    StatusText = workflowResult.QuotaResult.IsUserCanceled ? "已取消购买" : "次数不足";
+                    if (!workflowResult.QuotaResult.IsUserCanceled)
+                    {
+                        ResultDialog.ShowFailure("需要购买次数包", workflowResult.QuotaResult.Message);
+                    }
+
+                    return;
+                }
+
+                if (workflowResult.IsSuccess)
+                {
+                    ConversionQuotaResult? consumeResult = workflowResult.ConsumeResult;
+                    if (consumeResult is not null)
+                    {
+                        UpdateQuotaStatus(consumeResult);
+                        await RefreshTrialStatusAsync();
+                    }
+
+                    StatusText = consumeResult?.IsSuccess != false ? "处理完成" : "处理完成，扣次待同步";
+                    string successMessage = consumeResult?.IsSuccess != false
                         ? "音频处理已完成。"
                         : "音频处理已完成，但次数扣减尚未同步。请保持联网后再次处理。";
-                    ResultDialog.ShowSuccess(successTitle, successMessage, result.OutputPath ?? string.Empty);
+                    ResultDialog.ShowSuccess(
+                        workflowResult.SuccessTitle,
+                        successMessage,
+                        workflowResult.ConvertResult?.OutputPath ?? string.Empty);
                 }
                 else
                 {
                     StatusText = "处理失败";
-                    retry = ResultDialog.ShowFailure("处理失败", result.ErrorMessage ?? "未知错误");
+                    retry = ResultDialog.ShowFailure(
+                        "处理失败",
+                        workflowResult.ConvertResult?.ErrorMessage ?? "未知错误");
                 }
             }
             while (retry);
@@ -636,6 +728,7 @@ namespace AudioConvert.ViewModels
             if (!buyRequested)
             {
                 StatusText = purchaseInfo.IsSuccess ? "已取消购买" : purchaseInfo.Message;
+                await TryShowTrialMembershipClaimAsync(TrialMembershipPromptTrigger.PurchaseClosed);
                 return;
             }
 
@@ -645,10 +738,17 @@ namespace AudioConvert.ViewModels
             {
                 ConversionQuotaResult result = await _quotaService.PurchaseQuotaAsync();
                 UpdateQuotaStatus(result);
+                await RefreshTrialStatusAsync();
+                await UpdateStoreAccountStateAsync(result.IsSuccess);
                 StatusText = result.IsSuccess ? "购买完成" : result.Message;
                 if (!result.IsSuccess && !result.IsUserCanceled)
                 {
                     ResultDialog.ShowFailure("购买失败", result.Message);
+                }
+
+                if (!result.IsSuccess)
+                {
+                    await TryShowTrialMembershipClaimAsync(TrialMembershipPromptTrigger.PurchaseClosed);
                 }
             }
             finally
@@ -670,6 +770,8 @@ namespace AudioConvert.ViewModels
             {
                 ConversionQuotaResult result = await _quotaService.SignInAsync();
                 UpdateQuotaStatus(result);
+                await RefreshTrialStatusAsync();
+                await UpdateStoreAccountStateAsync(result.IsSuccess);
                 StatusText = result.IsSuccess ? "Microsoft Store 账号已同步" : result.Message;
                 if (!result.IsSuccess && !result.IsUserCanceled)
                 {
@@ -686,6 +788,110 @@ namespace AudioConvert.ViewModels
         {
             ConversionQuotaResult result = await _quotaService.RefreshBalanceAsync();
             UpdateQuotaStatus(result);
+            bool isTrialAvailable = await RefreshTrialStatusAsync();
+            await UpdateStoreAccountStateAsync(result.IsSuccess && !isTrialAvailable);
+        }
+
+        private async Task<bool> RefreshTrialStatusAsync()
+        {
+            if (_quotaService is TrialThenStoreConversionQuotaService trialQuotaService)
+            {
+                TrialQuotaStatus status = await trialQuotaService.GetTrialStatusAsync();
+                TrialStatusText = status.DisplayText;
+                return status.IsAvailable;
+            }
+
+            TrialStatusText = "试用会员：不可用";
+            return false;
+        }
+
+        public async Task<bool> TryShowTrialMembershipClaimAsync(TrialMembershipPromptTrigger trigger)
+        {
+            if (_trialMembershipClaimCoordinator is null)
+            {
+                return false;
+            }
+
+            bool claimed = await _trialMembershipClaimCoordinator.TryShowClaimPromptAsync(trigger);
+            if (claimed)
+            {
+                await RefreshTrialStatusAsync();
+            }
+
+            return claimed;
+        }
+
+        private async Task UpdateStoreAccountStateAsync(bool isSynced)
+        {
+            if (!isSynced)
+            {
+                IsStoreAccountSynced = false;
+                return;
+            }
+
+            string displayName = await TryGetWindowsAccountDisplayNameAsync();
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                displayName = "Microsoft Store";
+            }
+
+            StoreAccountDisplayName = displayName;
+            StoreAccountInitials = BuildAccountInitials(displayName);
+            IsStoreAccountSynced = true;
+        }
+
+        private static async Task<string> TryGetWindowsAccountDisplayNameAsync()
+        {
+            try
+            {
+                IReadOnlyList<Windows.System.User> users = await Windows.System.User.FindAllAsync();
+                Windows.System.User? user = users.FirstOrDefault();
+                if (user is null)
+                {
+                    return string.Empty;
+                }
+
+                object displayName = await user.GetPropertyAsync(Windows.System.KnownUserProperties.DisplayName);
+                if (displayName is string displayNameText && !string.IsNullOrWhiteSpace(displayNameText))
+                {
+                    return displayNameText.Trim();
+                }
+
+                object accountName = await user.GetPropertyAsync(Windows.System.KnownUserProperties.AccountName);
+                if (accountName is string accountNameText && !string.IsNullOrWhiteSpace(accountNameText))
+                {
+                    return accountNameText.Trim();
+                }
+            }
+            catch
+            {
+                // Store sync is still valid even when Windows privacy settings hide account info.
+            }
+
+            return string.Empty;
+        }
+
+        private static string BuildAccountInitials(string displayName)
+        {
+            string normalizedName = displayName.Trim();
+            int emailSeparatorIndex = normalizedName.IndexOf('@');
+            if (emailSeparatorIndex > 0)
+            {
+                normalizedName = normalizedName.Substring(0, emailSeparatorIndex);
+            }
+
+            char[] separators = { ' ', '.', '_', '-' };
+            string[] nameParts = normalizedName
+                .Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                .Where(part => part.Any(char.IsLetterOrDigit))
+                .ToArray();
+
+            IEnumerable<char> initials = nameParts.Length >= 2
+                ? nameParts.Take(2).Select(part => part.First(char.IsLetterOrDigit))
+                : normalizedName.Where(char.IsLetterOrDigit).Take(2);
+
+            string result = new string(initials.ToArray()).ToUpperInvariant();
+            return string.IsNullOrWhiteSpace(result) ? LoginButtonFallbackInitials : result;
         }
 
         private void UpdateQuotaStatus(ConversionQuotaResult result)
