@@ -454,7 +454,7 @@ namespace AudioConvert.Services
                 IntPtr windowHandle = _windowHandleProvider();
                 if (windowHandle != IntPtr.Zero)
                 {
-                    _isInitializedForWindow = InitializeStoreContextWindow(_storeContext, windowHandle);
+                    _isInitializedForWindow = WinRtWindowInitializer.TryInitialize(_storeContext, windowHandle);
                 }
             }
 
@@ -519,48 +519,6 @@ namespace AudioConvert.Services
             catch
             {
                 return false;
-            }
-        }
-
-        private static bool InitializeStoreContextWindow(StoreContext context, IntPtr windowHandle)
-        {
-            return InitializeObjectWithWindow(context, windowHandle);
-        }
-
-        private static bool InitializeObjectWithWindow(object target, IntPtr windowHandle)
-        {
-            IntPtr unknown = IntPtr.Zero;
-            IntPtr initializeWithWindowPointer = IntPtr.Zero;
-
-            try
-            {
-                unknown = Marshal.GetIUnknownForObject(target);
-                Guid interfaceId = typeof(IInitializeWithWindow).GUID;
-                int result = Marshal.QueryInterface(unknown, ref interfaceId, out initializeWithWindowPointer);
-                if (result != 0 || initializeWithWindowPointer == IntPtr.Zero)
-                {
-                    return false;
-                }
-
-                var initializeWithWindow = (IInitializeWithWindow)Marshal.GetObjectForIUnknown(initializeWithWindowPointer);
-                initializeWithWindow.Initialize(windowHandle);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            finally
-            {
-                if (initializeWithWindowPointer != IntPtr.Zero)
-                {
-                    Marshal.Release(initializeWithWindowPointer);
-                }
-
-                if (unknown != IntPtr.Zero)
-                {
-                    Marshal.Release(unknown);
-                }
             }
         }
 
@@ -633,14 +591,6 @@ namespace AudioConvert.Services
         private static string FormatOptionalExtendedError(Exception? extendedError)
         {
             return extendedError is null ? string.Empty : " " + FormatExtendedError(extendedError);
-        }
-
-        [ComImport]
-        [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        private interface IInitializeWithWindow
-        {
-            void Initialize(IntPtr hwnd);
         }
 
         [DllImport("advapi32.dll", SetLastError = true)]
