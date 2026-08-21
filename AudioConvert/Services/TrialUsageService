@@ -1,0 +1,241 @@
+using System;
+using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AudioConvert.Services
+{
+    public interface ITrialMembershipStore
+    {
+        Task<TrialMembershipState> GetStateAsync();
+
+        Task<TrialMembershipState> ClaimAsync(DateTimeOffset claimedAtUtc);
+    }
+
+    public sealed class TrialMembershipState
+    {
+        private TrialMembershipState(
+            bool hasClaimed,
+            DateTimeOffset? claimedAtUtc,
+            DateTimeOffset? expiresAtUtc)
+        {
+            HasClaimed = hasClaimed;
+            ClaimedAtUtc = claimedAtUtc;
+            ExpiresAtUtc = expiresAtUtc;
+        }
+
+        public bool HasClaimed { get; }
+
+        public DateTimeOffset? ClaimedAtUtc { get; }
+
+        public DateTimeOffset? ExpiresAtUtc { get; }
+
+        public static TrialMembershipState NotClaimed()
+        {
+            return new TrialMembershipState(false, null, null);
+        }
+
+        public static TrialMembershipState Claimed(DateTimeOffset claimedAtUtc, DateTimeOffset expiresAtUtc)
+        {
+            return new TrialMembershipState(
+                true,
+                claimedAtUtc.ToUniversalTime(),
+                expiresAtUtc.ToUniversalTime());
+        }
+
+        public static TrialMembershipState LegacyClaimedExpired()
+        {
+            return Claimed(DateTimeOffset.MinValue, DateTimeOffset.MinValue);
+        }
+
+        public bool IsActive(DateTimeOffset nowUtc)
+        {
+            DateTimeOffset utcNow = nowUtc.ToUniversalTime();
+            return HasClaimed &&
+                   ClaimedAtUtc.HasValue &&
+                   ExpiresAtUtc.HasValue &&
+                   utcNow >= ClaimedAtUtc.Value &&
+                   utcNow < ExpiresAtUtc.Value;
+        }
+
+        public bool HasExpired(DateTimeOffset nowUtc)
+        {
+            DateTimeOffset utcNow = nowUtc.ToUniversalTime();
+            return HasClaimed &&
+                   ExpiresAtUtc.HasValue &&
+                   utcNow >= ExpiresAtUtc.Value;
+        }
+
+        public TimeSpan GetRemaining(DateTimeOffset nowUtc)
+        {
+            if (!ExpiresAtUtc.HasValue)
+            {
+                return TimeSpan.Zero;
+            }
+
+            TimeSpan remaining = ExpiresAtUtc.Value - nowUtc.ToUniversalTime();
+            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+        }
+    }
+
+    public sealed class TrialQuotaStatus
+    {
+        public TrialQuotaStatus(bool isAvailable, string displayText)
+        {
+            IsAvailable = isAvailable;
+            DisplayText = displayText ?? throw new ArgumentNullException(nameof(displayText));
+        }
+
+        public bool IsAvailable { get; }
+
+        public string DisplayText { get; }
+    }
+
+    public sealed class LocalTrialUsageStore : ITrialMembershipStore
+    {
+        private const string MembershipMarker = "AudioConvertTrialMembership:v1";
+        private static readonly byte[] LegacyUsedMarker = Encoding.UTF8.GetBytes("AudioConvertTrialUsed:v1");
+        private readonly string _stateFilePath;
+
+        public LocalTrialUsageStore()
+            : this(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AudioConvert",
+                "trial-state.dat"))
+        {
+        }
+
+        public LocalTrialUsageStore(string stateFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(stateFilePath))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(stateFilePath));
+            }
+
+            _stateFilePath = stateFilePath;
+        }
+
+        public Task<TrialMembershipState> GetStateAsync()
+        {
+            return Task.Run(() =>
+            {
+                if (!File.Exists(_stateFilePath))
+                {
+                    return TrialMembershipState.NotClaimed();
+                }
+
+                try
+                {
+                    byte[] protectedData = File.ReadAllBytes(_stateFilePath);
+                    byte[] data = ProtectedData.Unprotect(
+                        protectedData,
+                        optionalEntropy: null,
+                        scope: DataProtectionScope.CurrentUser);
+
+                    if (ByteArraysEqual(data, LegacyUsedMarker))
+                    {
+                        return TrialMembershipState.LegacyClaimedExpired();
+                    }
+
+                    string text = Encoding.UTF8.GetString(data);
+                    return ParseMembershipState(text);
+                }
+                catch
+                {
+                    return TrialMembershipState.NotClaimed();
+                }
+            });
+        }
+
+        public Task<TrialMembershipState> ClaimAsync(DateTimeOffset claimedAtUtc)
+        {
+            return Task.Run(() =>
+            {
+                DateTimeOffset normalizedClaimedAtUtc = claimedAtUtc.ToUniversalTime();
+                TrialMembershipState state = TrialMembershipState.Claimed(
+                    normalizedClaimedAtUtc,
+                    normalizedClaimedAtUtc.AddDays(1));
+
+                string? directory = Path.GetDirectoryName(_stateFilePath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                string text =
+                    MembershipMarker + Environment.NewLine +
+                    "claimed=" + normalizedClaimedAtUtc.ToString("O", CultureInfo.InvariantCulture) + Environment.NewLine +
+                    "expires=" + state.ExpiresAtUtc!.Value.ToString("O", CultureInfo.InvariantCulture);
+
+                byte[] protectedData = ProtectedData.Protect(
+                    Encoding.UTF8.GetBytes(text),
+                    optionalEntropy: null,
+                    scope: DataProtectionScope.CurrentUser);
+
+                File.WriteAllBytes(_stateFilePath, protectedData);
+                return state;
+            });
+        }
+
+        private static TrialMembershipState ParseMembershipState(string text)
+        {
+            string[] lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            if (lines.Length < 3 || !string.Equals(lines[0], MembershipMarker, StringComparison.Ordinal))
+            {
+                return TrialMembershipState.NotClaimed();
+            }
+
+            DateTimeOffset? claimedAtUtc = null;
+            DateTimeOffset? expiresAtUtc = null;
+            foreach (string line in lines)
+            {
+                if (line.StartsWith("claimed=", StringComparison.Ordinal))
+                {
+                    claimedAtUtc = ParseUtc(line.Substring("claimed=".Length));
+                }
+                else if (line.StartsWith("expires=", StringComparison.Ordinal))
+                {
+                    expiresAtUtc = ParseUtc(line.Substring("expires=".Length));
+                }
+            }
+
+            return claimedAtUtc.HasValue && expiresAtUtc.HasValue
+                ? TrialMembershipState.Claimed(claimedAtUtc.Value, expiresAtUtc.Value)
+                : TrialMembershipState.NotClaimed();
+        }
+
+        private static DateTimeOffset? ParseUtc(string value)
+        {
+            if (DateTimeOffset.TryParse(
+                    value,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out DateTimeOffset parsed))
+            {
+                return parsed.ToUniversalTime();
+            }
+
+            return null;
+        }
+
+        private static bool ByteArraysEqual(byte[] left, byte[] right)
+        {
+            if (left.Length != right.Length)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < left.Length; index++)
+            {
+                if (left[index] != right[index])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+}
