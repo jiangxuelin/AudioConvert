@@ -1,0 +1,107 @@
+using System;
+using System.Threading.Tasks;
+
+namespace AudioConvert.Services
+{
+    public sealed class AudioProcessingWorkflow
+    {
+        private readonly IConversionQuotaService _quotaService;
+
+        public AudioProcessingWorkflow(IConversionQuotaService quotaService)
+        {
+            _quotaService = quotaService ?? throw new ArgumentNullException(nameof(quotaService));
+        }
+
+        public async Task<AudioProcessingWorkflowResult> ExecuteAsync(
+            Func<Task<ConvertResult>> operation,
+            string successTitle,
+            IProgress<string>? progress)
+        {
+            if (operation == null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            progress?.Report("正在检查剩余次数...");
+            ConversionQuotaResult quotaResult = await _quotaService.EnsureQuotaAsync();
+            if (!quotaResult.IsSuccess)
+            {
+                return AudioProcessingWorkflowResult.QuotaFailure(quotaResult);
+            }
+
+            progress?.Report("正在处理...");
+            ConvertResult convertResult = await operation();
+            if (!convertResult.IsSuccess)
+            {
+                return AudioProcessingWorkflowResult.ConvertFailure(convertResult);
+            }
+
+            progress?.Report("正在扣减次数...");
+            ConversionQuotaResult consumeResult = await _quotaService.ConsumeOneAsync();
+            return AudioProcessingWorkflowResult.Success(
+                successTitle,
+                convertResult,
+                consumeResult);
+        }
+    }
+
+    public sealed class AudioProcessingWorkflowResult
+    {
+        private AudioProcessingWorkflowResult(
+            bool isSuccess,
+            ConvertResult? convertResult,
+            ConversionQuotaResult? quotaResult,
+            ConversionQuotaResult? consumeResult,
+            string successTitle)
+        {
+            IsSuccess = isSuccess;
+            ConvertResult = convertResult;
+            QuotaResult = quotaResult;
+            ConsumeResult = consumeResult;
+            SuccessTitle = successTitle;
+        }
+
+        public bool IsSuccess { get; }
+
+        public ConvertResult? ConvertResult { get; }
+
+        public ConversionQuotaResult? QuotaResult { get; }
+
+        public ConversionQuotaResult? ConsumeResult { get; }
+
+        public string SuccessTitle { get; }
+
+        public static AudioProcessingWorkflowResult QuotaFailure(ConversionQuotaResult quotaResult)
+        {
+            return new AudioProcessingWorkflowResult(
+                false,
+                null,
+                quotaResult ?? throw new ArgumentNullException(nameof(quotaResult)),
+                null,
+                string.Empty);
+        }
+
+        public static AudioProcessingWorkflowResult ConvertFailure(ConvertResult convertResult)
+        {
+            return new AudioProcessingWorkflowResult(
+                false,
+                convertResult ?? throw new ArgumentNullException(nameof(convertResult)),
+                null,
+                null,
+                string.Empty);
+        }
+
+        public static AudioProcessingWorkflowResult Success(
+            string successTitle,
+            ConvertResult convertResult,
+            ConversionQuotaResult consumeResult)
+        {
+            return new AudioProcessingWorkflowResult(
+                true,
+                convertResult ?? throw new ArgumentNullException(nameof(convertResult)),
+                null,
+                consumeResult ?? throw new ArgumentNullException(nameof(consumeResult)),
+                successTitle ?? string.Empty);
+        }
+    }
+}
