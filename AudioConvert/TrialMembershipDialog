@@ -1,0 +1,339 @@
+<Window
+    x:Class="AudioConvert.TrialMembershipDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="领取 1 天试用会员"
+    Width="840"
+    Height="580"
+    AllowsTransparency="True"
+    Background="Transparent"
+    FontFamily="Microsoft YaHei UI, Segoe UI"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    WindowStyle="None">
+    <Window.Resources>
+        <Style x:Key="TrialBadgeTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#1E293B" />
+        </Style>
+
+        <Style x:Key="TrialFeatureIconStyle" TargetType="Border">
+            <Setter Property="Width" Value="56" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="Background" Value="#EEF5FF" />
+            <Setter Property="CornerRadius" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="TrialFeatureIconTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="#2563EB" />
+        </Style>
+
+        <Style x:Key="TrialFeatureTitleStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="#111827" />
+        </Style>
+
+        <Style x:Key="TrialFeatureBodyStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#667085" />
+        </Style>
+    </Window.Resources>
+
+    <Border
+        Background="White"
+        BorderBrush="#D8E2F0"
+        BorderThickness="1"
+        CornerRadius="22">
+        <Border.Effect>
+            <DropShadowEffect
+                BlurRadius="26"
+                Direction="270"
+                Opacity="0.18"
+                ShadowDepth="10"
+                Color="#1C335E" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#FFFFFF" />
+                    <GradientStop Offset="0.55" Color="#FAFCFF" />
+                    <GradientStop Offset="1" Color="#F1F6FF" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <Button
+                Width="44"
+                Height="44"
+                Margin="0,20,24,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="CloseButton_Click"
+                Content="×"
+                Cursor="Hand"
+                FontSize="34"
+                Foreground="#3F4556" />
+
+            <Grid Margin="32,26,34,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="74" />
+                    <RowDefinition Height="196" />
+                    <RowDefinition Height="146" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <Border
+                        Width="50"
+                        Height="50"
+                        Background="#2563EB"
+                        CornerRadius="12">
+                        <Image
+                            Width="40"
+                            Height="40"
+                            Source="Assets/AppIcon.png"
+                            Stretch="Uniform" />
+                    </Border>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="21"
+                            FontWeight="Bold"
+                            Foreground="#111827"
+                            Text="音频格式转换程序" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="14"
+                            Foreground="#596276"
+                            Text="专业 · 高效 · 纯净" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="470" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock
+                            x:Name="HeadlineText"
+                            FontSize="40"
+                            FontWeight="Black"
+                            Foreground="#070B16"
+                            LineHeight="58"
+                            TextWrapping="Wrap">
+                            <Run Text="领取 " />
+                            <Run
+                                FontSize="62"
+                                Foreground="#1D5DFF"
+                                Text="1 天" />
+                            <Run Text="试用会员" />
+                        </TextBlock>
+                        <TextBlock
+                            Margin="0,18,0,0"
+                            FontSize="18"
+                            Foreground="#46536B"
+                            TextWrapping="NoWrap">
+                            <Run Text="会员功能全开放，" />
+                            <Run
+                                FontWeight="Bold"
+                                Foreground="#195BFF"
+                                Text="无限次转换" />
+                            <Run Text="，畅快体验！" />
+                        </TextBlock>
+
+                        <StackPanel Margin="0,28,0,0" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource TrialBadgeTextStyle}" Text="●  无需支付" />
+                            <Rectangle
+                                Width="1"
+                                Height="20"
+                                Margin="24,0"
+                                Fill="#DFE6F3" />
+                            <TextBlock Style="{StaticResource TrialBadgeTextStyle}" Text="●  立即领取" />
+                            <Rectangle
+                                Width="1"
+                                Height="20"
+                                Margin="24,0"
+                                Fill="#DFE6F3" />
+                            <TextBlock Style="{StaticResource TrialBadgeTextStyle}" Text="●  1天后自动结束" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Column="1" Margin="16,0,0,0">
+                        <Border
+                            Width="244"
+                            Height="158"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="#256DFF"
+                            CornerRadius="22"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="8" />
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect
+                                    BlurRadius="18"
+                                    Direction="285"
+                                    Opacity="0.28"
+                                    ShadowDepth="10"
+                                    Color="#2563EB" />
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="24"
+                                    Foreground="White"
+                                    Text="VIP" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="48"
+                                    FontWeight="Black"
+                                    Foreground="White"
+                                    Text="1天" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="20"
+                                    FontWeight="Bold"
+                                    Foreground="White"
+                                    Text="试用会员" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Width="106"
+                            Height="106"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Background="#FFF4D8"
+                            BorderBrush="#F8BE55"
+                            BorderThickness="2"
+                            CornerRadius="53">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="34"
+                                    FontWeight="Bold"
+                                    Foreground="#E7971E"
+                                    Text="∞" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="22"
+                                    FontWeight="Bold"
+                                    Foreground="#BE7410"
+                                    Text="无限次" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="22"
+                                    FontWeight="Bold"
+                                    Foreground="#BE7410"
+                                    Text="转换" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <Border
+                    Grid.Row="2"
+                    Padding="14"
+                    Background="#FEFFFF"
+                    BorderBrush="#E5ECF6"
+                    BorderThickness="1"
+                    CornerRadius="18">
+                    <Border.Effect>
+                        <DropShadowEffect
+                            BlurRadius="14"
+                            Direction="270"
+                            Opacity="0.09"
+                            ShadowDepth="5"
+                            Color="#234267" />
+                    </Border.Effect>
+                    <UniformGrid Columns="4">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Style="{StaticResource TrialFeatureIconStyle}">
+                                <TextBlock Style="{StaticResource TrialFeatureIconTextStyle}" Text="∞" />
+                            </Border>
+                            <TextBlock Style="{StaticResource TrialFeatureTitleStyle}" Text="无限次转换" />
+                            <TextBlock Style="{StaticResource TrialFeatureBodyStyle}" Text="次数不限，想转就转" />
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Style="{StaticResource TrialFeatureIconStyle}">
+                                <TextBlock Style="{StaticResource TrialFeatureIconTextStyle}" Text="MP3" />
+                            </Border>
+                            <TextBlock Style="{StaticResource TrialFeatureTitleStyle}" Text="支持100+格式" />
+                            <TextBlock Style="{StaticResource TrialFeatureBodyStyle}" Text="覆盖常见音频格式" />
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Style="{StaticResource TrialFeatureIconStyle}">
+                                <TextBlock Style="{StaticResource TrialFeatureIconTextStyle}" Text="快" />
+                            </Border>
+                            <TextBlock Style="{StaticResource TrialFeatureTitleStyle}" Text="高速转换" />
+                            <TextBlock Style="{StaticResource TrialFeatureBodyStyle}" Text="高效稳定，不等待" />
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Style="{StaticResource TrialFeatureIconStyle}">
+                                <TextBlock Style="{StaticResource TrialFeatureIconTextStyle}" Text="☷" />
+                            </Border>
+                            <TextBlock Style="{StaticResource TrialFeatureTitleStyle}" Text="批量处理" />
+                            <TextBlock Style="{StaticResource TrialFeatureBodyStyle}" Text="一次处理多个文件" />
+                        </StackPanel>
+                    </UniformGrid>
+                </Border>
+
+                <StackPanel Grid.Row="3" VerticalAlignment="Bottom">
+                    <Button
+                        Height="56"
+                        Margin="40,0"
+                        Background="#256DFF"
+                        BorderBrush="#256DFF"
+                        BorderThickness="1"
+                        Click="ClaimButton_Click"
+                        Content="立即领取 1 天试用会员"
+                        Cursor="Hand"
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Foreground="White">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border
+                                    x:Name="Root"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="9">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Root" Property="Background" Value="#1559E8" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <TextBlock
+                        Margin="0,14,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="13"
+                        Foreground="#667085"
+                        Text="试用期间不限功能、不限次数，1天后自动结束，不会自动续费" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+
+</Window>
