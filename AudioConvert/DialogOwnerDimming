@@ -1,0 +1,36 @@
+using System;
+using System.Windows;
+
+namespace AudioConvert
+{
+    public sealed class DialogOwnerDimming : IDisposable
+    {
+        public const double DimmedOwnerOpacity = 0.98;
+
+        private readonly Window? _owner;
+        private readonly double? _previousOpacity;
+
+        private DialogOwnerDimming(Window? owner)
+        {
+            if (owner is not null && owner.IsVisible)
+            {
+                _owner = owner;
+                _previousOpacity = owner.Opacity;
+                owner.Opacity = DimmedOwnerOpacity;
+            }
+        }
+
+        public static DialogOwnerDimming Apply(Window? owner)
+        {
+            return new DialogOwnerDimming(owner);
+        }
+
+        public void Dispose()
+        {
+            if (_owner is not null && _previousOpacity.HasValue)
+            {
+                _owner.Opacity = _previousOpacity.Value;
+            }
+        }
+    }
+}
