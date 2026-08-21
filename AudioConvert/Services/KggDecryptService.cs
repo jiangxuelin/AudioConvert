@@ -461,26 +461,6 @@ namespace AudioConvert.Services
             return "mp3";
         }
 
-        private string? FindKgmMaskPath()
-        {
-            string[] candidates =
-            {
-            Path.Combine(_applicationBaseDirectory, "kgm.mask"),
-            Path.Combine(_applicationBaseDirectory, "Tools", "kgm.mask"),
-            Path.GetFullPath(Path.Combine(_applicationBaseDirectory, "..", "..", "..", "..", "WpfApp1", "Tools", "kgm.mask")),
-        };
-
-            foreach (string candidate in candidates)
-            {
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-
-            return null;
-        }
-
         private string? FindKugouInfraRunnerPath()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
