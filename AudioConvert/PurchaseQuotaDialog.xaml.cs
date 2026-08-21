@@ -46,25 +46,15 @@ namespace AudioConvert
         {
             var dialog = new PurchaseQuotaDialog(purchaseInfo);
             Window? owner = Application.Current?.MainWindow;
-            double? previousOpacity = null;
             if (owner is not null && owner.IsVisible)
             {
                 dialog.Owner = owner;
-                previousOpacity = owner.Opacity;
-                owner.Opacity = 0.9;
             }
 
-            try
+            using (DialogOwnerDimming.Apply(owner))
             {
                 dialog.ShowDialog();
                 return dialog.BuyRequested;
-            }
-            finally
-            {
-                if (owner is not null && previousOpacity.HasValue)
-                {
-                    owner.Opacity = previousOpacity.Value;
-                }
             }
         }
 
