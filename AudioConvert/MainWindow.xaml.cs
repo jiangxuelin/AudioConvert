@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using AudioConvert.Services;
 using AudioConvert.ViewModels;
 
 namespace AudioConvert
@@ -13,16 +15,20 @@ namespace AudioConvert
     {
         private IntPtr _windowHandle;
         private MainWindowViewModel? _viewModel;
+        private bool _isClosingAfterTrialPrompt;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            var trialMembershipStore = new LocalTrialUsageStore();
             _viewModel = new MainWindowViewModel(
-                new Services.AudioConverterService(),
-                CreateQuotaService());
+                new AudioConverterService(),
+                CreateQuotaService(trialMembershipStore),
+                CreateTrialMembershipClaimCoordinator(trialMembershipStore));
             DataContext = _viewModel;
             Loaded += MainWindow_Loaded;
+            Closing += MainWindow_Closing;
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -42,13 +48,25 @@ namespace AudioConvert
             return _windowHandle;
         }
 
-        private Services.IConversionQuotaService CreateQuotaService()
+        private IConversionQuotaService CreateQuotaService(ITrialMembershipStore trialMembershipStore)
         {
 #if PACKAGE_TEST_QUOTA
-            return new Services.PackageTestConversionQuotaService();
+            return new PackageTestConversionQuotaService();
 #else
-            return new Services.MicrosoftStoreConversionQuotaService(GetWindowHandle);
+            return new TrialThenStoreConversionQuotaService(
+                trialMembershipStore,
+                new MicrosoftStoreConversionQuotaService(GetWindowHandle));
 #endif
+        }
+
+        private TrialMembershipClaimCoordinator CreateTrialMembershipClaimCoordinator(
+            ITrialMembershipStore trialMembershipStore)
+        {
+            return new TrialMembershipClaimCoordinator(
+                trialMembershipStore,
+                new TrialMembershipDialogPresenter(() => this),
+                new MicrosoftStoreReviewService(GetWindowHandle),
+                () => DateTimeOffset.UtcNow);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -65,6 +83,25 @@ namespace AudioConvert
             catch
             {
                 // Store status refresh is optional at startup; purchase/execute will report details.
+            }
+        }
+
+        private async void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            if (_isClosingAfterTrialPrompt || _viewModel is null)
+            {
+                return;
+            }
+
+            e.Cancel = true;
+            _isClosingAfterTrialPrompt = true;
+            try
+            {
+                await _viewModel.TryShowTrialMembershipClaimAsync(TrialMembershipPromptTrigger.ApplicationExit);
+            }
+            finally
+            {
+                Close();
             }
         }
 
