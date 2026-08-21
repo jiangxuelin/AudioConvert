@@ -1,0 +1,61 @@
+using System;
+using System.Threading.Tasks;
+
+namespace AudioConvert.Services
+{
+    public enum TrialMembershipPromptTrigger
+    {
+        PurchaseClosed,
+        ApplicationExit
+    }
+
+    public enum TrialMembershipPromptResult
+    {
+        Closed,
+        Claimed
+    }
+
+    public interface ITrialMembershipPromptPresenter
+    {
+        Task<TrialMembershipPromptResult> ShowAsync(TrialMembershipPromptTrigger trigger);
+    }
+
+    public sealed class TrialMembershipClaimCoordinator
+    {
+        private readonly ITrialMembershipStore _trialMembershipStore;
+        private readonly ITrialMembershipPromptPresenter _presenter;
+        private readonly IStoreReviewService _storeReviewService;
+        private readonly Func<DateTimeOffset> _utcNowProvider;
+
+        public TrialMembershipClaimCoordinator(
+            ITrialMembershipStore trialMembershipStore,
+            ITrialMembershipPromptPresenter presenter,
+            IStoreReviewService storeReviewService,
+            Func<DateTimeOffset> utcNowProvider)
+        {
+            _trialMembershipStore = trialMembershipStore ?? throw new ArgumentNullException(nameof(trialMembershipStore));
+            _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
+            _storeReviewService = storeReviewService ?? throw new ArgumentNullException(nameof(storeReviewService));
+            _utcNowProvider = utcNowProvider ?? throw new ArgumentNullException(nameof(utcNowProvider));
+        }
+
+        public async Task<bool> TryShowClaimPromptAsync(TrialMembershipPromptTrigger trigger)
+        {
+            TrialMembershipState state = await _trialMembershipStore.GetStateAsync();
+            if (state.HasClaimed)
+            {
+                return false;
+            }
+
+            TrialMembershipPromptResult result = await _presenter.ShowAsync(trigger);
+            if (result != TrialMembershipPromptResult.Claimed)
+            {
+                return false;
+            }
+
+            await _trialMembershipStore.ClaimAsync(_utcNowProvider());
+            await _storeReviewService.RequestReviewAsync();
+            return true;
+        }
+    }
+}
