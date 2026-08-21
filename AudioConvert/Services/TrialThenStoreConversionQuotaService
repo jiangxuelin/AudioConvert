@@ -1,0 +1,106 @@
+using System;
+using System.Threading.Tasks;
+
+namespace AudioConvert.Services
+{
+    public sealed class TrialThenStoreConversionQuotaService : IConversionQuotaService
+    {
+        private readonly ITrialMembershipStore _trialMembershipStore;
+        private readonly IConversionQuotaService _storeQuotaService;
+        private readonly Func<DateTimeOffset> _utcNowProvider;
+
+        public TrialThenStoreConversionQuotaService(
+            ITrialMembershipStore trialMembershipStore,
+            IConversionQuotaService storeQuotaService)
+            : this(trialMembershipStore, storeQuotaService, () => DateTimeOffset.UtcNow)
+        {
+        }
+
+        public TrialThenStoreConversionQuotaService(
+            ITrialMembershipStore trialMembershipStore,
+            IConversionQuotaService storeQuotaService,
+            Func<DateTimeOffset> utcNowProvider)
+        {
+            _trialMembershipStore = trialMembershipStore ?? throw new ArgumentNullException(nameof(trialMembershipStore));
+            _storeQuotaService = storeQuotaService ?? throw new ArgumentNullException(nameof(storeQuotaService));
+            _utcNowProvider = utcNowProvider ?? throw new ArgumentNullException(nameof(utcNowProvider));
+        }
+
+        public Task<ConversionQuotaResult> SignInAsync()
+        {
+            return _storeQuotaService.SignInAsync();
+        }
+
+        public async Task<ConversionQuotaResult> RefreshBalanceAsync()
+        {
+            TrialMembershipState state = await _trialMembershipStore.GetStateAsync();
+            if (state.IsActive(_utcNowProvider()))
+            {
+                return ConversionQuotaResult.Success(null, "1 天试用会员有效，不限次转换。");
+            }
+
+            return await _storeQuotaService.RefreshBalanceAsync();
+        }
+
+        public async Task<ConversionQuotaResult> EnsureQuotaAsync()
+        {
+            TrialMembershipState state = await _trialMembershipStore.GetStateAsync();
+            if (state.IsActive(_utcNowProvider()))
+            {
+                return ConversionQuotaResult.Success(null, "1 天试用会员有效，不限次转换。");
+            }
+
+            return await _storeQuotaService.EnsureQuotaAsync();
+        }
+
+        public Task<ConversionQuotaResult> PurchaseQuotaAsync()
+        {
+            return _storeQuotaService.PurchaseQuotaAsync();
+        }
+
+        public async Task<ConversionQuotaResult> ConsumeOneAsync()
+        {
+            TrialMembershipState state = await _trialMembershipStore.GetStateAsync();
+            if (state.IsActive(_utcNowProvider()))
+            {
+                return ConversionQuotaResult.Success(null, "试用会员有效，本次处理不扣次数。");
+            }
+
+            return await _storeQuotaService.ConsumeOneAsync();
+        }
+
+        public Task<ConversionQuotaPurchaseInfo> GetPurchaseInfoAsync()
+        {
+            return _storeQuotaService.GetPurchaseInfoAsync();
+        }
+
+        public async Task<TrialQuotaStatus> GetTrialStatusAsync()
+        {
+            DateTimeOffset nowUtc = _utcNowProvider();
+            TrialMembershipState state = await _trialMembershipStore.GetStateAsync();
+            if (!state.HasClaimed)
+            {
+                return new TrialQuotaStatus(false, "试用会员：可领取");
+            }
+
+            if (state.IsActive(nowUtc))
+            {
+                return new TrialQuotaStatus(true, "试用会员：剩余 " + FormatRemaining(state.GetRemaining(nowUtc)));
+            }
+
+            return new TrialQuotaStatus(false, "试用会员：已结束");
+        }
+
+        private static string FormatRemaining(TimeSpan remaining)
+        {
+            if (remaining.TotalHours >= 1)
+            {
+                int hours = Math.Max(1, (int)Math.Ceiling(remaining.TotalHours));
+                return hours + " 小时";
+            }
+
+            int minutes = Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes));
+            return minutes + " 分钟";
+        }
+    }
+}
