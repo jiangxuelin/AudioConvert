@@ -1,0 +1,58 @@
+using System;
+using System.Runtime.InteropServices;
+
+namespace AudioConvert.Services
+{
+    internal static class WinRtWindowInitializer
+    {
+        public static bool TryInitialize(object target, IntPtr windowHandle)
+        {
+            if (target is null || windowHandle == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            IntPtr unknown = IntPtr.Zero;
+            IntPtr initializeWithWindowPointer = IntPtr.Zero;
+
+            try
+            {
+                unknown = Marshal.GetIUnknownForObject(target);
+                Guid interfaceId = typeof(IInitializeWithWindow).GUID;
+                int result = Marshal.QueryInterface(unknown, ref interfaceId, out initializeWithWindowPointer);
+                if (result != 0 || initializeWithWindowPointer == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                var initializeWithWindow = (IInitializeWithWindow)Marshal.GetObjectForIUnknown(initializeWithWindowPointer);
+                initializeWithWindow.Initialize(windowHandle);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                if (initializeWithWindowPointer != IntPtr.Zero)
+                {
+                    Marshal.Release(initializeWithWindowPointer);
+                }
+
+                if (unknown != IntPtr.Zero)
+                {
+                    Marshal.Release(unknown);
+                }
+            }
+        }
+
+        [ComImport]
+        [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IInitializeWithWindow
+        {
+            void Initialize(IntPtr hwnd);
+        }
+    }
+}
